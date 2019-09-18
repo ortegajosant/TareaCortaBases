@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS Aerolinea(
 CREATE TABLE IF NOT EXISTS Puesto(
     IdPuesto INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     NombrePuesto TEXT NOT NULL,
-    Sueldo TEXT NOT NULL,
-    FechaInicio DATE NOT NULL
+    Lugar TEXT NOT NULL,
+    Sueldo TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Usuario(
@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS Usuario(
     Nombre TEXT NOT NULL,
     ApellidoPat TEXT NOT NULL,
     ApellidoMat TEXT NOT NULL,
+    Sexo CHAR NOT NULL,
+    FechaNacimiento DATE NOT NULL,
     Cedula TEXT NOT NULL,
     CuentaBancaria TEXT NOT NULL,
     Direccion TEXT NOT NULL
@@ -118,6 +120,13 @@ CREATE TABLE IF NOT EXISTS Clase(
     FOREIGN KEY (IdAvion) REFERENCES Avion(IdAvion)
 );
 
+CREATE TABLE IF NOT EXISTS Asiento (
+    IdAsiento INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    IdClase INTEGER NOT NULL,
+    NumeroAsiento INTEGER NOT NULL,
+    FOREIGN KEY (IdClase) REFERENCES Clase(IdClase) 
+);
+
 CREATE TABLE IF NOT EXISTS Equipaje(
     IdEquipaje INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     IdUsuario INTEGER NOT NULL,
@@ -130,11 +139,9 @@ CREATE TABLE IF NOT EXISTS Pasaporte(
     IdUsuario INTEGER NOT NULL,
     Nacionalidad TEXT NOT NULL,
     LugarNacimiento TEXT NOT NULL,
-    FechaNacimiento DATE NOT NULL,
     FechaEmision DATE NOT NULL,
     FechaExpiracion DATE NOT NULL,
     LugarEmision TEXT NOT NULL,
-    Sexo TEXT NOT NULL,
     CodigoEstado TEXT NOT NULL,
     NumeroSecuencial TEXT NOT NULL,
     NumeroPasaporte TEXT NOT NULL,
@@ -146,6 +153,7 @@ CREATE TABLE IF NOT EXISTS EmpleadoAerolinea(
     IdEmpleado INTEGER NOT NULL,
     IdAerolinea INTEGER NOT NULL,
     IdPuesto INTEGER NOT NULL,
+    FechaInicio DATE NOT NULL,
     FOREIGN KEY (IdEmpleado) REFERENCES Empleado(IdEmpleado),
     FOREIGN KEY (IdAerolinea) REFERENCES Aerolinea(IdAerolinea),
     FOREIGN KEY (IdPuesto) REFERENCES Puesto(IdPuesto)
@@ -155,10 +163,12 @@ CREATE TABLE IF NOT EXISTS EmpleadoAeropuerto(
     IdEmpleado INTEGER NOT NULL,
     IdAeropuerto INTEGER NOT NULL,
     IdPuesto INTEGER NOT NULL,
+    FechaInicio DATE NOT NULL,
     FOREIGN KEY (IdEmpleado) REFERENCES Empleado(IdEmpleado),
     FOREIGN KEY (IdAeropuerto) REFERENCES Aeropuerto(IdAeropuerto),
     FOREIGN KEY (IdPuesto) REFERENCES Puesto(IdPuesto)
 );
+
 
 CREATE TABLE IF NOT EXISTS Bodega(
     IdBodega INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -178,7 +188,7 @@ CREATE TABLE IF NOT EXISTS BodegaAvion(
 
 CREATE TABLE IF NOT EXISTS ControladorVuelo(
     IdControladorVuelo INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    IdVuelo INTEGER NOT NULL,
+    INTEGER NOT NULL,
     CodigoComunicacion TEXT NOT NULL,
     FOREIGN KEY (IdVuelo) REFERENCES Vuelo(IdVuelo)
 );
@@ -186,12 +196,15 @@ CREATE TABLE IF NOT EXISTS ControladorVuelo(
 CREATE TABLE IF NOT EXISTS Tiquete(
     IdTiquete INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     IdVuelo INTEGER NOT NULL,
+    IdAsiento INTEGER NOT NULL,
     IdEquipaje INTEGER NOT NULL,
     IdPasaporte INTEGER NOT NULL,
     FOREIGN KEY (IdVuelo) REFERENCES Vuelo(IdVuelo),
     FOREIGN KEY (IdEquipaje) REFERENCES Equipaje(IdEquipaje),
-    FOREIGN KEY (IdPasaporte) REFERENCES Pasaporte(IdPasaporte)
+    FOREIGN KEY (IdPasaporte) REFERENCES Pasaporte(IdPasaporte),
+    FOREIGN KEY (IdAsiento) REFERENCES Asiento(IdAsiento)
 );
+
 
 CREATE TABLE IF NOT EXISTS Taller(
     IdTaller INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
