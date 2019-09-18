@@ -270,3 +270,71 @@ def insertar_controlador_vuelo():
                     (vuelo[0], str(193) + "." + str(random.randint(100, 999)) + "." + str(cont)))
         cont += 1
     viajes_db.commit()
+
+
+def insertar_taller():
+    vdb.execute("SELECT AEP.IdAerpuerto, AEP.Nombre FROM Aeropuerto AEP;")
+    aeropuertos = vdb.fetchall()
+
+    for aeropuerto in aeropuertos:
+        vdb.execute("INSERT INTO Taller ('IdAeropuerto', 'Nombre') VALUES (?, ?)",
+                    (aeropuerto[0], "Taller " + aeropuerto[1]))
+    viajes_db.commit()
+
+
+def insertar_taller_avion():
+    vdb.execute("SELECT * FROM Taller;")
+    talleres = vdb.fetchall()
+
+    for taller in talleres:
+        vdb.execute("SELECT A.IdAvion FROM Avion A INNER JOIN AeropuertoAerolinea AAE ON AAE.IdAeropuerto = " + str(
+            taller[1]) + " WHERE A.Estado = 'En reparación';")
+        aviones = vdb.fetchall()
+        for avion in aviones:
+            vdb.execute("INSERT INTO TallerAvion ('IdTaller', 'IdAvion') VALUES (?, ?);", (taller[0], avion[0]))
+    viajes_db.commit()
+
+
+def insertar_factura():
+    vdb.execute("SELECT TA.IdTallerAvion FROM TallerAvion TA;")
+    reparaciones = vdb.fetchall()
+
+    for reparacion in reparaciones:
+        fecha_entrada = datetime.datetime.today() - datetime.timedelta(days=random.randrange(0, 60))
+        fecha_salida = fecha_entrada + datetime.timedelta(days=random.randrange(0, 30))
+
+        if fecha_salida >= datetime.datetime.today():
+            vdb.execute(
+                "INSERT INTO Factura ('IdTallerAvion', 'Costo', 'FechaHoraSalida', 'FechaHoraLlegada') VALUES (?, ?, ?, ?);",
+                (reparacion[0], random.randint(1000000, 3000000), 'NULL', fecha_entrada))
+        else:
+            vdb.execute(
+                "INSERT INTO Factura ('IdTallerAvion', 'Costo', 'FechaHoraSalida', 'FechaHoraLlegada') VALUES (?, ?, ?, ?);",
+                (reparacion[0], random.randint(1000000, 3000000), fecha_salida, fecha_entrada))
+    viajes_db.commit()
+
+
+def insertar_daño():
+    vdb.execute("SELECT F.IdFactura FROM Factura;")
+    facturas = vdb.fetchall()
+
+    daños = ["Impacto por rayo", "Impacto de pájaro", "Granizadas",
+             "Fuga de líquido", "Frenos inestables", "Ruidos en el motor",
+             "Generación de energía"]
+    for factura in facturas:
+        vdb.execute("INSERT INTO Daño ('IdFactura', 'Descripcion') VALUES (?, ?);",
+                    (factura[0], random.choice(daños)))
+    viajes_db.commit()
+
+
+def insertar_repuesto():
+    vdb.execute("SELECT F.IdFactura FROM Factura;")
+    facturas = vdb.fetchall()
+
+    repuestos = ["Motor", "Batería", "Llanta", "Parabrisas", "Giroscopo", "Frenos",
+                 "Asientos", "Ventanas", "Puerta", "Aceites", "Alternadores", "Luces de navegación",
+                 "Hélice", "Tanque", "Retenedores", "Radio Comunicador", "Empaques"]
+    for factura in facturas:
+        vdb.execute("INSERT INTO Repuesto ('IdFactura', 'Descripcion') VALUES (?, ?);",
+                    (factura[0], random.choice(repuestos)))
+    viajes_db.commit()

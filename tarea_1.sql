@@ -224,19 +224,19 @@ CREATE TABLE IF NOT EXISTS Factura(
     IdFactura INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     IdTaller INTEGER NOT NULL,
     Costo INTEGER NOT NULL,
-    FechaHoraSalida DATETIME NOT NULL,
+    FechaHoraSalida DATETIME,
     FechaHoraLlegada DATETIME NOT NULL,
     FOREIGN KEY (IdTaller) REFERENCES Taller(IdTaller)
 );
 
 CREATE TABLE IF NOT EXISTS Daño(
-    IdTaller INTEGER NOT NULL,
+    IdFactura INTEGER NOT NULL,
     Descripcion TEXT NOT NULL,
-    FOREIGN KEY (IdTaller) REFERENCES Taller(IdTaller)
+    FOREIGN KEY (IdFactura) REFERENCES Factura(IdFactura)
 );
 
 CREATE TABLE IF NOT EXISTS Repuesto(
-    IdTaller INTEGER NOT NULL,
+    IdFactura INTEGER NOT NULL,
     Descripcion TEXT NOT NULL,
-    FOREIGN KEY (IdTaller) REFERENCES Taller(IdTaller)
+    FOREIGN KEY (IdFactura) REFERENCES Factura(IdFactura)
 );
