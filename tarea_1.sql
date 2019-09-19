@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS Puesto(
     IdPuesto INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     NombrePuesto TEXT NOT NULL,
     Lugar TEXT NOT NULL,
-    Sueldo TEXT NOT NULL
+    Sueldo INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Usuario(
@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS Vuelo(
     FechaHoraLlegada DATETIME NOT NULL,
     Estado TEXT NOT NULL,
     Precio INTEGER NOT NULL,
+    PesoMaximo INTEGER NOT NULL,
     FOREIGN KEY (IdAvion) REFERENCES Avion(IdAvion)
 );
 
@@ -154,6 +155,7 @@ CREATE TABLE IF NOT EXISTS EmpleadoAerolinea(
     IdAerolinea INTEGER NOT NULL,
     IdPuesto INTEGER NOT NULL,
     FechaInicio DATE NOT NULL,
+    Salario INTEGER NOT NULL,
     FOREIGN KEY (IdEmpleado) REFERENCES Empleado(IdEmpleado),
     FOREIGN KEY (IdAerolinea) REFERENCES Aerolinea(IdAerolinea),
     FOREIGN KEY (IdPuesto) REFERENCES Puesto(IdPuesto)
@@ -164,6 +166,7 @@ CREATE TABLE IF NOT EXISTS EmpleadoAeropuerto(
     IdAeropuerto INTEGER NOT NULL,
     IdPuesto INTEGER NOT NULL,
     FechaInicio DATE NOT NULL,
+    Salario INTEGER NOT NULL,
     FOREIGN KEY (IdEmpleado) REFERENCES Empleado(IdEmpleado),
     FOREIGN KEY (IdAeropuerto) REFERENCES Aeropuerto(IdAeropuerto),
     FOREIGN KEY (IdPuesto) REFERENCES Puesto(IdPuesto)
@@ -188,7 +191,7 @@ CREATE TABLE IF NOT EXISTS BodegaAvion(
 
 CREATE TABLE IF NOT EXISTS ControladorVuelo(
     IdControladorVuelo INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    INTEGER NOT NULL,
+    IdVuelo INTEGER NOT NULL,
     CodigoComunicacion TEXT NOT NULL,
     FOREIGN KEY (IdVuelo) REFERENCES Vuelo(IdVuelo)
 );
@@ -214,19 +217,20 @@ CREATE TABLE IF NOT EXISTS Taller(
 );
 
 CREATE TABLE IF NOT EXISTS TallerAvion(
+    IdTallerAvion INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     IdTaller INTEGER NOT NULL,
     IdAvion INTEGER NOT NULL,
+    FechaHoraSalida DATETIME,
+    FechaHoraLlegada DATETIME NOT NULL,
     FOREIGN KEY (IdTaller) REFERENCES Taller(IdTaller),
     FOREIGN KEY (IdAvion) REFERENCES Avion(IdAvion)
 );
 
 CREATE TABLE IF NOT EXISTS Factura(
     IdFactura INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    IdTaller INTEGER NOT NULL,
+    IdTallerAvion INTEGER NOT NULL,
     Costo INTEGER NOT NULL,
-    FechaHoraSalida DATETIME,
-    FechaHoraLlegada DATETIME NOT NULL,
-    FOREIGN KEY (IdTaller) REFERENCES Taller(IdTaller)
+    FOREIGN KEY (IdTallerAvion) REFERENCES TallerAvion(IdTallerAvion)
 );
 
 CREATE TABLE IF NOT EXISTS Daño(
@@ -240,3 +244,135 @@ CREATE TABLE IF NOT EXISTS Repuesto(
     Descripcion TEXT NOT NULL,
     FOREIGN KEY (IdFactura) REFERENCES Factura(IdFactura)
 );
+
+-- Consultas
+-- 1) TOP 10 Aerolíneas 
+SELECT AE.Nombre
+FROM Aerolinea AE
+WHERE AE.IdAerolinea IN 
+	(SELECT EA.IdAerolinea 
+	FROM EmpleadoAerolinea EA 
+	GROUP BY EA.IdAerolinea 
+	ORDER BY COUNT(EA.IdAerolinea) DESC 
+	LIMIT 10)
+
+-- 2) TOP 10 Aeropuertos
+SELECT AEP.Nombre
+FROM Aeropuerto AEP
+WHERE AEP.IdAeropuerto IN 
+	(SELECT AA.IdAeropuerto
+	FROM AeropuertoAerolinea AA 
+	GROUP BY AA.IdAeropuerto 
+	ORDER BY COUNT(AA.IdAeropuerto) DESC 
+	LIMIT 10)
+
+-- 3) Informacion de empleados con mas salarios
+SELECT U.*
+FROM Usuario U 
+INNER JOIN Empleado E ON E.IdUsuario = U.IdUsuario
+WHERE E.IdEmpleado IN
+	(
+	SELECT EA.IdEmpleado FROM EmpleadoAerolinea EA
+	GROUP BY EA.IdEmpleado ORDER BY EA.Salario DESC
+	LIMIT 1
+	)
+	OR E.IdEmpleado IN
+	(
+	SELECT EAP.IdEmpleado FROM EmpleadoAeropuerto EAP
+	GROUP BY EAP.IdEmpleado ORDER BY EAP.Salario DESC
+	LIMIT 1
+	);
+
+-- 4) Promedio de salarios de aeropuertos
+SELECT AVG(EA.Salario) AS Promedio, A.Nombre
+FROM Aeropuerto A
+INNER JOIN EmpleadoAeropuerto EA
+ON EA.IdAeropuerto = A.IdAeropuerto
+GROUP BY EA.IdAeropuerto
+ORDER BY COUNT(EA.IdAeropuerto) DESC;
+
+-- 5) Cantidad de aviones en reparacion para una aerolinea
+SELECT COUNT(A.IdAerolinea) AS 'Cantidad de aviones', AE.Nombre AS 'Aerolínea' 
+FROM Avion A
+INNER JOIN Aerolinea AE ON A.IdAerolinea = AE.IdAerolinea
+WHERE AE.Nombre = "LATAM" AND A.Estado = "En reparacion";
+
+-- 6) Informacion del avion
+SELECT FA.Costo AS 'Costo de reparación', A.Modelo, F.Nombre AS 'Fabricante', A.Codigo
+FROM Avion A 
+INNER JOIN Fabricante F ON A.IdFabricante = F.IdFabricante
+INNER JOIN TallerAvion TA ON TA.IdAvion = A.IdAvion
+INNER JOIN Factura FA ON FA.IdTallerAvion = TA.IdTallerAvion
+INNER JOIN Taller T ON T.IdTaller = TA.IdTaller
+INNER JOIN Aeropuerto AEP ON AEP.IdAeropuerto = T.IdAeropuerto
+INNER JOIN Aerolinea AE ON AE.IdAerolinea = A.IdAerolinea
+WHERE AE.Nombre = "Avianca" AND AEP.Nombre = "Aeropuerto de Changi";
+
+-- 7) Cantidad aviones en aeropuerto
+SELECT COUNT(AEP.Localizacion)
+FROM Avion A
+INNER JOIN  AeropuertoAEP ON AEP.Localizacion = A.Posicion
+WHERE AEP.Nombre = "" AND A.Estado = "Activo";
+
+-- 8) Promedio costo de reparacion para un aeropuerto
+SELECT AVG(FA.Costo) AS 'Promedio costo de reparación', AEP.Nombre
+FROM Factura FA
+INNER JOIN TallerAvion TA ON TA.IdTallerAvion = FA.IdTallerAvion
+INNER JOIN Taller T ON T.IdTaller = TA.IdTaller
+INNER JOIN Aeropuerto AEP ON T.IdAeropuerto = AEP.IdAeropuerto
+WHERE AEP.Nombre = "Aeropuerto de Changi";
+
+-- 9) Cantidad de aviones inactivos en una bodega
+SELECT COUNT(B.IdBodega) as 'Cantidad de aviones inactivos', B.Nombre
+FROM Avion A
+INNER JOIN BodegaAvion BA ON BA.IdAvion = A.IdAvion
+INNER JOIN Bodega B ON B.IdBodega = BA.IdBodega
+WHERE B.Nombre = "Bodega Aeropuerto Internacional Hamad" AND A.Estado = "Inactivo";
+
+-- 10) Fabricantes con mayor cantidad de modelos
+SELECT F.Nombre, COUNT(F.Nombre) AS 'Cantidad de modelos'
+FROM Fabricante F
+INNER JOIN Avion A ON A.IdFabricante = F.IdFabricante
+GROUP BY F.Nombre
+HAVING COUNT(F.Nombre) = 
+	(SELECT COUNT(F.Nombre)
+	FROM Fabricante F
+	INNER JOIN Avion A ON A.IdFabricante = F.IdFabricante
+	GROUP BY F.Nombre
+	ORDER BY COUNT(F.Nombre) DESC
+	LIMIT 1);
+
+-- 11) Cantidad de vuelos activos de aerolineas con la letra 'a'
+SELECT AE.Nombre, COUNT(AE.Nombre) AS 'Cantidad de vuelos activos'
+FROM Aerolinea AE
+INNER JOIN Avion A ON A.IdAerolinea = AE.IdAerolinea
+INNER JOIN Vuelo V ON V.IdAvion = A.IdAvion
+WHERE INSTR(LOWER(AE.Nombre), 'a') > 0 AND V.Estado = "Activo"
+GROUP BY AE.Nombre
+ORDER BY COUNT(AE.Nombre) DESC;
+
+-- 12) Intervalo de horas en el que llegan mas vuelos
+
+CREATE TABLE IF NOT EXISTS Intervalos (
+IntervaloInicio TIME NOT NULL,
+IntervaloFinal TIME NOT NULL);
+INSERT INTO Intervalos ('IntervaloInicio', 'IntervaloFinal')
+VALUES ('00:00:00', '06:00:00'),
+('03:00:01', '06:00:00'),
+('06:00:01', '09:00:00'),
+('09:00:01', '12:00:00'),
+('12:00:01', '15:00:00'),
+('15:00:01', '18:00:00'),
+('18:00:01', '21:00:00'), 
+('21:00:01' , '23:59:59');
+
+SELECT I.IntervaloInicio, I.IntervaloFinal
+FROM Intervalos I
+INNER JOIN Vuelo V ON strftime('%H:%M:%f', V.FechaHoraLlegada) BETWEEN I.IntervaloInicio AND I.IntervaloFinal
+INNER JOIN Aeropuerto AEP ON V.Destino = AEP.Localizacion
+WHERE AEP.Nombre = "Aeropuerto de Munich"
+GROUP BY V.FechaHoraLlegada
+ORDER BY COUNT(V.FechaHoraLlegada) DESC
+LIMIT 1;
+
+DROP TABLE Intervalos;
