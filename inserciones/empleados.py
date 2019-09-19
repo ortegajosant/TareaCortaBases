@@ -64,8 +64,6 @@ def insertar_usuario(cantidad):
     viajes_db.commit()
 
 
-# insertar_usuario(4000)
-
 def insertar_empleado():
     vdb.execute("SELECT * FROM Usuario U WHERE U.FechaNacimiento < '2001-01-01';")
     usuarios = vdb.fetchall()
@@ -80,8 +78,6 @@ def insertar_empleado():
 
     viajes_db.commit()
 
-
-# insertar_empleado()
 
 def insertar_pasaporte():
     vdb.execute("SELECT * FROM Usuario;")
@@ -122,8 +118,6 @@ def insertar_pasaporte():
     viajes_db.commit()
 
 
-# insertar_pasaporte()
-
 def insertar_puesto():
     puestos_aerolinea = [("Piloto", 2000000), ("Azafata", 600000), ("Copiloto", 1200000)]
     puestos_aeropuerto = [("Despachador de vuelos", 400000), ("Técnicos Administrativos", 450000),
@@ -143,8 +137,6 @@ def insertar_puesto():
         cont += 1
     viajes_db.commit()
 
-
-# insertar_puesto()
 
 def insertar_empleado_aerolinea():
     vdb.execute("SELECT E.IdEmpleado FROM Empleado E;")
@@ -168,8 +160,6 @@ def insertar_empleado_aerolinea():
         cantidad_empleados -= 1
     viajes_db.commit()
 
-
-# insertar_empleado_aerolinea()
 
 def insertar_empleados_aeropuerto():
     vdb.execute("SELECT E.IdEmpleado FROM Empleado E LEFT JOIN EmpleadoAerolinea EA "
@@ -195,21 +185,20 @@ def insertar_empleados_aeropuerto():
     viajes_db.commit()
 
 
-# insertar_empleados_aeropuerto()
-
-
-def insertar_equipaje():
-    vdb.execute("SELECT V.PesoMaximo, A.CantidadTripulacion, A.IdAvion, V.IdVuelo FROM Vuelo V INNER JOIN Avion ON A.IdAvion = V.IdAvion;")
+def insertar_equipaje_tiquete():
+    vdb.execute(
+        "SELECT V.PesoMaximo, A.CapacidadTripulacion, A.IdAvion, V.IdVuelo FROM Vuelo V INNER JOIN Avion A ON A.IdAvion = V.IdAvion;")
     vuelos = vdb.fetchall()
-    vdb.execute("SELECT U.IdUsuario, PS.IdPasaporte FROM Usuario U INNER JOIN Pasaporte PS ON PS.IdUsuario = U.IdUsuario;")
+    vdb.execute(
+        "SELECT U.IdUsuario, PS.IdPasaporte FROM Usuario U INNER JOIN Pasaporte PS ON PS.IdUsuario = U.IdUsuario;")
     usuarios = vdb.fetchall()
     id_equipaje = 1
     for vuelo in vuelos:
-        cont = random.randint(10, vuelo[1])
         usuarios_temp = usuarios.copy()
         vdb.execute("SELECT A.IdAsiento FROM Asiento A WHERE A.IdClase IN "
                     "(SELECT C.IdClase FROM Clase C WHERE C.IdAvion =" + str(vuelo[2]) + ");")
         asientos = vdb.fetchall()
+        cont = random.randint(10, len(asientos))
         while cont > 0:
             random.shuffle(usuarios_temp)
             random.shuffle(asientos)
@@ -243,8 +232,6 @@ def insertar_horarios():
     viajes_db.commit()
 
 
-# insertar_horarios()
-
 def insertar_horario_trabajo():
     vdb.execute("SELECT H.IdHorario FROM Horario H WHERE H.IdHorario < 8;")
     horarios = vdb.fetchall()
@@ -275,14 +262,3 @@ def insertar_telefonos():
                         (usuario[0], random.randint(10000000, 999999999)))
             cant -= 1
     viajes_db.commit()
-
-# insertar_telefonos()
-
-# def insertar_intarlos():
-#     vdb.execute("INSERT INTO Intervalos ('IntervaloInicio', 'IntervaloFinal')"
-#                     " VALUES ('00:00:00', '06:00:00'), ('03:00:01', '06:00:00'), "
-#                 "('06:00:01', '09:00:00'), ('09:00:01', '12:00:00'), ('12:00:01', '15:00:00'), "
-#                 "('15:00:01', '18:00:00'), ('18:00:01', '21:00:00'), ('21:00:01' , '23:59:59');")
-#     viajes_db.commit()
-
-# insertar_intarlos()

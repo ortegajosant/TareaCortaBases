@@ -11,6 +11,7 @@ inserciones/.idea/inserciones.iml
 inserciones/.idea/misc.xml
 inserciones/.idea/modules.xml
 inserciones/.idea/vcs.xml
+inserciones/__pycache__/
 
 ### VisualStudioCode ###
 .vscode/*
