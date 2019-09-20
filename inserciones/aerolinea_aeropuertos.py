@@ -5,6 +5,10 @@ vdb = viajes_db.cursor()
 
 
 def insertar_aerolineas():
+    """
+    Funcion que agrega los datos para la inserción de las aerolineas en la base de datos
+    :return: None
+    """
     lista_aerlineas = ["Avianca", "Azul Airlines", "LATAM", "Sky Airline",
                        "Easyfly", "Singapur Airlines", "Qatar Airways",
                        "Emirates", "ANA AII Nippon Airways", "The Airways"
@@ -25,6 +29,10 @@ def insertar_aerolineas():
 
 
 def calcular_coordenada():
+    """
+    Funcion auxiliar que calcula una coordenada aleatoria para la ubicacion de un avion En Vuelo
+    :return: String, Coordenada
+    """
     latitud = random.randint(-90, 90)
     longitud = random.randint(-180, 180)
     if latitud > 0:
@@ -40,6 +48,10 @@ def calcular_coordenada():
 
 
 def insertar_aeropuerto():
+    """
+    Funcion que realiza la insercion de los aeropuertos en la base de datos
+    :return: None
+    """
     aeropuertos = ["de Changi", "Internacional Hamad", "de Munich", "Internacional Chubu Centrair",
                    "de Heathrow", "de Zurich", "de Frankfurt", "Internacional de Hong Kong", "Internacional de Haneda",
                    "Internacional de Incheon", "Juan Santamaría", "Internacional El Dorado",
@@ -69,6 +81,10 @@ def insertar_aeropuerto():
 
 
 def insertar_horario_servicio():
+    """
+    Funcion que realiza la insercion de horarios para los aeropuertos
+    :return: None
+    """
     vdb.execute("SELECT AEP.IdAeropuerto FROM Aeropuerto AEP;")
     aeropuertos = vdb.fetchall()
     for aeropuerto in aeropuertos:
@@ -82,6 +98,10 @@ def insertar_horario_servicio():
 
 
 def insertar_fabricantes():
+    """
+    Funcion que realiza la insercion de los fabricante de aviones en la base de datos
+    :return: None
+    """
     fabricantes = ["Boeing", "Airbus", "Embraer", "Bombardier", "Tupoloev",
                    "Ahrens", "Agusta", "Avro", "British Aircraft Corporation",
                    "Beechcraft", "Convair", "Dassault", "Ilyushin"]
@@ -96,6 +116,11 @@ def insertar_fabricantes():
 
 
 def insertar_aviones(cantidad):
+    """
+    Funcion que inserta los aviones en la base de datos
+    :param cantidad: INTEGER, Cantidad de aviones a insertar
+    :return: None
+    """
     vdb.execute("SELECT * FROM Aerolinea;")
     aerolineas = vdb.fetchall()
     vdb.execute("SELECT * FROM Fabricante;")
@@ -132,6 +157,10 @@ def insertar_aviones(cantidad):
 
 
 def insertar_aeropuerto_aerolinea():
+    """
+    Funcion que inserta la relacion de aeropuerto y aerolinea
+    :return: None
+    """
     vdb.execute("SELECT AEP.IdAeropuerto FROM Aeropuerto AEP;")
     aeropuertos = vdb.fetchall()
     vdb.execute("SELECT AE.IdAerolinea FROM Aerolinea AE;")
@@ -149,6 +178,11 @@ def insertar_aeropuerto_aerolinea():
 
 
 def insertar_vuelo(cantidad_vuelos):
+    """
+    Funcion que inserta los vuelos en los vuelos en la base de datos
+    :param cantidad_vuelos: INTEGER, Cantidad de vuelos que se desean agregar
+    :return: None
+    """
     viajes_db = sqlite3.connect("viajesDB.sqlite3")
     vdb = viajes_db.cursor()
     vdb.execute("SELECT A.IdAvion FROM Avion A;")
@@ -195,6 +229,10 @@ def insertar_vuelo(cantidad_vuelos):
 
 
 def insertar_clase():
+    """
+    Funcion que agregar las clase para cada avion
+    :return: None
+    """
     vdb.execute("SELECT A.IdAvion FROM Avion A;")
     aviones = vdb.fetchall()
 
@@ -209,6 +247,10 @@ def insertar_clase():
 
 
 def insertar_asiento():
+    """
+    Funcion que agrega los asientos correspondientes a cada avion
+    :return: None
+    """
     vdb.execute("SELECT C.IdClase, C.IdAvion FROM Clase C WHERE C.Tipo = 'Común';")
     comunes = vdb.fetchall()
     vdb.execute("SELECT C.IdClase, C.IdAvion FROM Clase C WHERE C.Tipo = 'Preferencial';")
@@ -234,6 +276,10 @@ def insertar_asiento():
 
 
 def insertar_bodega():
+    """
+    Funcion que agrega las bodegas para cada aeropuerto en la base de datos
+    :return: None
+    """
     vdb.execute("SELECT AEP.IdAeropuerto, AEP.Nombre FROM Aeropuerto AEP;")
     aeropuertos = vdb.fetchall()
     for aeropuerto in aeropuertos:
@@ -244,6 +290,10 @@ def insertar_bodega():
 
 
 def insertar_bodega_avion():
+    """
+    Funcion que agrega la relacion Bodega Avion
+    :return: None
+    """
     vdb.execute("SELECT B.IdBodega, B.IdAeropuerto FROM Bodega B;")
     bodegas = vdb.fetchall()
 
@@ -270,6 +320,10 @@ def insertar_bodega_avion():
 
 
 def insertar_controlador_vuelo():
+    """
+    Funcion que agrega en controlador del vuelo que pertenece a un vuelo especifico
+    :return: None
+    """
     vdb.execute("SELECT V.IdVuelo FROM Vuelo V;")
     vuelos = vdb.fetchall()
     cont = 1
@@ -281,6 +335,10 @@ def insertar_controlador_vuelo():
 
 
 def insertar_taller():
+    """
+    Funcion que realiza a insercion de los talleres para un aeropuerto
+    :return: None
+    """
     vdb.execute("SELECT AEP.IdAeropuerto, AEP.Nombre FROM Aeropuerto AEP;")
     aeropuertos = vdb.fetchall()
 
@@ -291,6 +349,10 @@ def insertar_taller():
 
 
 def insertar_taller_avion():
+    """
+    Funcion que inserta la relacion de taller avion en la base de datos
+    :return: None
+    """
     vdb.execute("SELECT * FROM Taller;")
     talleres = vdb.fetchall()
 
@@ -317,6 +379,10 @@ def insertar_taller_avion():
 
 
 def insertar_factura():
+    """
+    Funcion que agrega la factura para la reparacion de un avion de algun taller
+    :return: None
+    """
     vdb.execute("SELECT TA.IdTallerAvion FROM TallerAvion TA WHERE FechaHoraSalida IS NOT NULL;")
     reparaciones = vdb.fetchall()
 
@@ -327,6 +393,10 @@ def insertar_factura():
 
 
 def insertar_danho():
+    """
+    Funcion que agregar la insercion de los danhos para una factura
+    :return: None
+    """
     vdb.execute("SELECT F.IdFactura FROM Factura F;")
     facturas = vdb.fetchall()
 
@@ -340,6 +410,10 @@ def insertar_danho():
 
 
 def insertar_repuesto():
+    """
+    Funcion que agrega el repuesto para una reparacion en una factura
+    :return: None
+    """
     vdb.execute("SELECT F.IdFactura FROM Factura F;")
     facturas = vdb.fetchall()
 
